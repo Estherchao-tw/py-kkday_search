@@ -10,29 +10,24 @@ import random
 import time
 import json
 import sys
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
-
-
-def get_useragent():
-    user_agent_list=[
-        # chrome
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11",
-        "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.133 Safari/534.16"
-    ]
-    UserAgent = random.choice(user_agent_list)
 
 #使用selenium连接网络
 def selenium_chrome(url):
     option = Options()
     #使用無痕模式
     option.add_argument("--incognito")
-    
-    ua = get_useragent()
-    option.add_argument("user-agent={}".format(ua))
+    #解決 error certificate Error parsing cert retrieved from AIA (as DER):
+    # ERROR: Couldn't read tbsCertificate as SEQUENCE
+    # ERROR: Failed parsing Certificate
+    option.add_experimental_option('excludeSwitches', ['enable-logging'])
+    #不打開視窗繼續執行
+    # option.add_argument("headless")
+    # 打開chrome網頁
     browser = webdriver.Chrome(options=option)
     browser.get(url)
 
@@ -40,55 +35,51 @@ def selenium_chrome(url):
 
 # 中文轉成unicode
 def c_to_unicode(city_name):
+    # city_name type is str
+    # 内容是str，但是需要轉化type變成是unicode,就可以使用 encode('unicode_escape')
+    # 轉成unicode 會有b的前綴符號，要去掉就可以使用 decode('utf-8)
     to_unicode = city_name.encode('unicode_escape').decode('utf-8')
-
-    # print(to_unicode)
-    # print(to_unicode,type(to_unicode))
     return to_unicode
-# 在script中找到data
-def script_tran(all_script):
-    for script in all_script:
-        if '{"select_country"' in script.text:
-            # print(number,paragraphs)
-             print(type(script.text))
-             print(script.text)
 
-    return script.text
 
-# unicode 比較 script中是否符合
-def compare_city_name(b,all_scripts):
+
+# unicode 比較 script的data中是否符合
+# all script 的類型是<class 'bs4.element.ResultSet'>
+## 透過for loop 將script(line)儲存成 <class 'str'>
+# 並將unicode 後的 cityname 放入判斷是否在script裡面
+def compare_city_name(uni_city_name):
+    with open("./script1.json") as all_script:
+        data = json.load(all_script)
+        # print(data)
+        print(uni_city_name)
         
-    for line in all_scripts:
-
-        if line.find(b) != -1:
-            print(b,line.find(b) != -1)
-            # print(line.text)
-        else:
-            print("error,it's a wrong city name")
-    return b
+        #判斷cityname
+        for line in data:
+            if line.find(uni_city_name) != -1:
+                print(line.find(uni_city_name))
+                return uni_city_name 
+                    # print(line.text)
+            else:
+                print("error,it's a wrong city name")
+                print(uni_city_name)
+                return False
 
 if __name__ == '__main__':
     print("start...")
-    city_name = "A01-001-00010"
+    city_name = "A01-001-00001"
     page=1
     url = "https://www.kkday.com/zh-tw/product/productlist?page=1&city={}&cat=TAG_4_4&sort=prec".format(city_name)
     browser = selenium_chrome(url)
 
-    soup = BeautifulSoup(browser.page_source, 'html.parser')
+    soup = BeautifulSoup(browser.page_source, 'html.parser',on_duplicate_attribute='ignore')
     all_scripts = soup.find_all("script")
 
+    time.sleep(5)
+    browser.close()
+    a = input("city_name") 
+    b = c_to_unicode(a) # \u65b0\u7af9 <class 'str'>
+    print(b)
+    compare_city_name(b)
+    print(compare_city_name(b))
 
-    print(type(all_scripts))
-    script0 = script_tran(all_scripts)
-    
-    print(type(script0))
-
-        
-
-    time.sleep(2)
-
-
-    a = input("city_name")
-    b = c_to_unicode(a)
-    print(b,type(b))
-    compare_city_name(b,all_scripts)
+    # write_data_json(all_scripts)

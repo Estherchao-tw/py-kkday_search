@@ -7,6 +7,7 @@
 """
 from bs4 import BeautifulSoup
 import time
+import json
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import pandas as pd
@@ -30,9 +31,49 @@ class Kkday:
 
             return browser
 
+        def find_city_id(self):
 
+        # 如果城市名 等於 cityList當中的城市，可以得知其城市的 i,j,k
+        #返回 id 給網址
+                        
+            with open("./search.json") as all_script:
+                    script = json.load(all_script)
+                    # print(data)
+
+                    data = script['search']['areaData']['zh-tw']['continents']
+                    id = data[0]['countries'][0]['cities'][24]['id']
+                    name = data[0]['countries'][0]['cities'][24]['name']
+                    N = len(data) #計算有多少洲:8
+                    # print(data)
+                    # print(id,name)
+                    print(N)
+                    cityList =[]
+                    # 將每個城市的id and name 抓出來
+                    for i in range(0,N-1):
+                        countries = data[i]['countries']
+                        J = len(countries) # 計算每一洲(區域)有幾個國家:27
+                        # print("J :",J)
+                        for j in range(0,J-1):
+                            cities = countries[j]['cities']
+                            K = len(cities) # 計算每個國家的城市有幾個
+                            # print("K:",K)
+                            for k in range(0,K-1):
+                                id = data[i]['countries'][j]['cities'][k]['id']
+                                name = data[i]['countries'][j]['cities'][k]['name']
+
+                                if self.city_name == name:
+                                    print(i,j,k)
+                                    print(id)
+                                    return id
+                                
+                            
+                            cityList.append([id,name])
+
+                    # print(cityList)
+ 
+        
         # 如果city_name 不是空的
-        if self.city_name: 
+        if find_city_id(self.city_name): 
             result = [] #回傳資料#收集data
             url = "https://www.kkday.com/zh-tw/product/productlist?page=1&city={}&cat=TAG_4_4&sort=prec".format(self.city_name)
             browser = selenium_chrome(url)
@@ -50,10 +91,12 @@ class Kkday:
                 star = detail.find('span',{'class':"text-grey-light"}).text
                 
                 link= detail.find('a').get('href')
-
+                # 資料疊加
                 result.append([title,date,price,star,link, "kk"])
                 
             print(result,type(result),"success")
+            # type要是 list 才可以儲存到pandas
+            # pandas 表格化
             df = pd.DataFrame(result,columns = ["活動名稱","價格","星級","預定日期","連結","品牌"])
             print(df)
             return df
@@ -66,5 +109,7 @@ class Kkday:
             
 
 print("start...") 
-demo = Kkday("A01-001-00015") 
+a = input("city_name") 
+
+demo = Kkday(a) 
 print(demo.scrape())  

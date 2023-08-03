@@ -53,7 +53,8 @@ if __name__ == '__main__':
         title = detail.find('span',{'class':"product-listview__name"}).text
         date = detail.find('div',{'class':"product-time-icon"}).text.replace('\t','').replace('\n','')
         price = detail.find('div',{'class':"product-pricing"}).text.replace('\t','').replace('\n','')
-        star = detail.find('div',{'class':"product-star"}).text.replace('(','').replace(')','')
+        star = detail.find('span',{'class':"text-grey-light"}).text
+
         link= detail.find('a').get('href')
 
         # print(type(title))
@@ -61,7 +62,9 @@ if __name__ == '__main__':
         # print(price.text.strip())
         # print(star.text)
         # print(link)
-        result.append(dict(title=title,date=date,price=price,star=star,link=link))
+        result.append([title,date,price,star,link, "kk"])
+
+        # result.append(dict(title=title,date=date,price=price,star=star,link=link))
         
     print(result,"success")
 
