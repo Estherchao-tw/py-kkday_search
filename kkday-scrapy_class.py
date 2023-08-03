@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import pandas as pd
 
 class Kkday:
     #建構式
@@ -46,19 +47,24 @@ class Kkday:
                 title = detail.find('span',{'class':"product-listview__name"}).text
                 date = detail.find('div',{'class':"product-time-icon"}).text.replace('\t','').replace('\n','')
                 price = detail.find('div',{'class':"product-pricing"}).text.replace('\t','').replace('\n','')
-                star = detail.find('div',{'class':"product-star"}).text.replace('(','').replace(')','')
+                star = detail.find('span',{'class':"text-grey-light"}).text
+                
                 link= detail.find('a').get('href')
 
-                result.append(dict(title=title,date=date,price=price,star=star,link=link))
+                result.append([title,date,price,star,link, "kk"])
                 
-            print("success")
-            return result
+            print(result,type(result),"success")
+            df = pd.DataFrame(result,columns = ["活動名稱","價格","星級","預定日期","連結","品牌"])
+            print(df)
+            return df
         time.sleep(5)
         browser.close(); #closes the browser
+
+    
 
 
             
 
 print("start...") 
-demo = Kkday("A01-001-00010") 
+demo = Kkday("A01-001-00015") 
 print(demo.scrape())  
