@@ -20,12 +20,11 @@ h = e.encode('unicode_escape').decode('utf-8')
 # 将中文字符串转换成 Unicode 编码
 
 
-print(type(a), a)
-print(type(b), b)
-print(type(c), c)
-print(type(d), d)
-
-print(type(e), e)
-print(type(f), f)
-print(type(g), g)
-print(type(h), h)
+print(type(a), a) ## 'str' 我
+print(type(b), b) ## 'str' в
+print(type(c), c) ## 'bytes' b'\\u0432'
+print(type(d), d) ## 'str' \u0432
+print(type(e), e) ## 'str' 我
+print(type(f), f) ## 'str' 我
+print(type(g), g) ## 'bytes' b'\\u6211'
+print(type(h), h) ## 'str' \u6211

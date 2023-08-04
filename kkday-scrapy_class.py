@@ -3,7 +3,7 @@
 @File  : kkday-scrapy_class.py
 @Author: EstherChao
 @Date  : 2023/8/3 12:15
-@Desc  : 爬蟲
+@Desc  : 輸入城市名找出kkday的一日遊行程
 """
 from bs4 import BeautifulSoup
 import time
@@ -31,22 +31,15 @@ class Kkday:
 
             return browser
 
-        def find_city_id(self):
+        def find_city_id(cityName):
 
         # 如果城市名 等於 cityList當中的城市，可以得知其城市的 i,j,k
         #返回 id 給網址
                         
             with open("./search.json") as all_script:
                     script = json.load(all_script)
-                    # print(data)
-
                     data = script['search']['areaData']['zh-tw']['continents']
-                    id = data[0]['countries'][0]['cities'][24]['id']
-                    name = data[0]['countries'][0]['cities'][24]['name']
                     N = len(data) #計算有多少洲:8
-                    # print(data)
-                    # print(id,name)
-                    print(N)
                     cityList =[]
                     # 將每個城市的id and name 抓出來
                     for i in range(0,N-1):
@@ -61,7 +54,7 @@ class Kkday:
                                 id = data[i]['countries'][j]['cities'][k]['id']
                                 name = data[i]['countries'][j]['cities'][k]['name']
 
-                                if self.city_name == name:
+                                if cityName == name:
                                     print(i,j,k)
                                     print(id)
                                     return id
@@ -73,9 +66,10 @@ class Kkday:
  
         
         # 如果city_name 不是空的
-        if find_city_id(self.city_name): 
+        if find_city_id(self.city_name):
             result = [] #回傳資料#收集data
-            url = "https://www.kkday.com/zh-tw/product/productlist?page=1&city={}&cat=TAG_4_4&sort=prec".format(self.city_name)
+            img = ['./kkday.png']
+            url = "https://www.kkday.com/zh-tw/product/productlist?page=1&city={}&cat=TAG_4_4&sort=prec".format(find_city_id(self.city_name))
             browser = selenium_chrome(url)
 
             soup = BeautifulSoup(browser.page_source, 'html.parser',on_duplicate_attribute='ignore')
@@ -86,19 +80,18 @@ class Kkday:
             #　標題、連結、價格、可使用日期、評分
             for detail in data:
                 title = detail.find('span',{'class':"product-listview__name"}).text
-                date = detail.find('div',{'class':"product-time-icon"}).text.replace('\t','').replace('\n','')
+                date = detail.find('div',{'class':"product-time-icon"}).text[-18:-1].replace('\t','').replace('\n','')
                 price = detail.find('div',{'class':"product-pricing"}).text.replace('\t','').replace('\n','')
-                star = detail.find('span',{'class':"text-grey-light"}).text
-                
+                star = detail.find('span',{'class':"text-grey-light"})
                 link= detail.find('a').get('href')
                 # 資料疊加
-                result.append([title,date,price,star,link, "kk"])
+                result.append([title,date,price,star,link,"https://www.kkday.com/favicon.png"])
                 
-            print(result,type(result),"success")
+            # print(result,type(result),"success")
             # type要是 list 才可以儲存到pandas
             # pandas 表格化
             df = pd.DataFrame(result,columns = ["活動名稱","價格","星級","預定日期","連結","品牌"])
-            print(df)
+            # print(df)
             return df
         time.sleep(5)
         browser.close(); #closes the browser

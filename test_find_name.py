@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@File  : kkdaytest.py
+@File  : test_find_name.py
 @Author: EstherChao
 @Date  : 2023/7/31 17:15
-@Desc  : 爬蟲
+@Desc  : 透過城市名 在script 中找出對應name (錯誤版本)
 """
 from bs4 import BeautifulSoup
 import random

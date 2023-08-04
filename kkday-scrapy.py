@@ -3,11 +3,10 @@
 @File  : kkday-scrapy.py
 @Author: EstherChao
 @Date  : 2023/7/31 17:15
-@Desc  : 爬蟲
+@Desc  : 透過seleniun爬蟲kkday
 """
 
 from bs4 import BeautifulSoup
-import random
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -27,6 +26,7 @@ def selenium_chrome(url):
     option = Options()
     #使用無痕模式
     option.add_argument("--incognito")
+    option.add_experimental_option('excludeSwitches', ['enable-logging'])
     
     # ua = get_user_agent()
     # option.add_argument("user-agent={}".format(ua))
@@ -51,10 +51,9 @@ if __name__ == '__main__':
     #　標題、連結、價格、可使用日期、評分
     for detail in data:
         title = detail.find('span',{'class':"product-listview__name"}).text
-        date = detail.find('div',{'class':"product-time-icon"}).text.replace('\t','').replace('\n','')
+        date = detail.find('div',{'class':"product-time-icon"}).text[-18:-1].replace('\t','').replace('\n','')
         price = detail.find('div',{'class':"product-pricing"}).text.replace('\t','').replace('\n','')
-        star = detail.find('span',{'class':"text-grey-light"}).text
-
+        star = detail.find('span',{'class':"text-grey-light"})
         link= detail.find('a').get('href')
 
         # print(type(title))
@@ -62,7 +61,7 @@ if __name__ == '__main__':
         # print(price.text.strip())
         # print(star.text)
         # print(link)
-        result.append([title,date,price,star,link, "kk"])
+        result.append([date,price,star, "kk"])
 
         # result.append(dict(title=title,date=date,price=price,star=star,link=link))
         

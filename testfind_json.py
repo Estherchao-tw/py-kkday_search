@@ -1,4 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+@File  : testfind_json.py
+@Author: EstherChao
+@Date  : 2023/7/31 17:15
+@Desc  : 透過城市名 在script 中找出對應name (正確版本)
 # python find data in json
+"""
 
 import json   
 e = "台南"
